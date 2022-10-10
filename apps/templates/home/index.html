@@ -1,0 +1,427 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} {{ name }} {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+    <div id="cy"></div>
+
+      <style type="text/css">
+        body { 
+          font: 14px helvetica neue, helvetica, arial, sans-serif;
+        }
+
+        #cy {
+          height: 100vh;
+          width: 100vw;
+          left: 0;
+          top: 0;
+        }
+      </style>
+      <script type="text/javascript">
+
+        var cy = cytoscape({
+          container: document.getElementById('cy'),
+
+          boxSelectionEnabled: false,
+          autounselectify: true,
+
+          style: cytoscape.stylesheet()
+            .selector('node')
+              .css({
+                'height': 100,
+                'width': 100,
+                'background-fit': 'cover',
+                'border-color': '#000',
+                'border-width': 3,
+                'border-opacity': 0.5
+              })
+            .selector('node[label]')
+              .css({
+                "label": "data(label)"
+              })
+            .selector('edge[label]')
+              .css({
+                "label": "data(label)",
+                "width": 3
+              })
+            .selector('.eating')
+              .css({
+                'border-color': 'red'
+              })
+            .selector('.autorotate')
+              .css({
+                "edge-text-rotation": "autorotate"
+              })
+            .selector('.eater')
+              .css({
+                'border-width': 9
+              })
+            {% for acc, pic in profile_picture.items %}
+              .selector('#{{ acc }}')
+                .css({
+                  'background-image': '{{ pic }}'
+                })
+            {% endfor %}
+            .selector('edge')
+              .css({
+                'curve-style': 'bezier',
+                'width': 3,
+                'line-color': 'lightgray',
+              }),
+
+          elements: {
+            nodes: [
+              {% for acc in profile_picture %}
+                { data: { id: '{{ acc }}', label: '{{ acc }}'}, classes: 'outline' },
+              {% endfor %}
+            ],
+            edges: [
+              {% for user in accs %}
+                {% if user.similarity %}
+                  { data: { source: '{{ user.acc1_profile }}', target: '{{ user.acc2_profile }}', label: "{{ user.similarity_percentage }}%"}, classes: "autorotate" },
+                {% endif %}
+              {% endfor %}
+            ],
+          },
+
+          layout: {
+            name: 'cose',
+            randomize: true,
+            directed: false,
+            padding: 10
+          }
+        }); // cy init
+        
+        var tappedBefore;
+        var tappedTimeout;
+        var test;
+        cy.on('tap', 'node', function(){
+          var nodes = this;
+          var tapped = nodes;
+          var food = [];
+
+          var tappedNow = event.cyTarget;
+          if (tappedTimeout && tappedBefore) {
+            clearTimeout(tappedTimeout);
+          }
+          if(tappedBefore === tappedNow) {
+            window.open('https://twitter.com/' + String(nodes.id()),'_blank');
+            tappedBefore = null;
+          } else {
+            tappedTimeout = setTimeout(function(){ tappedBefore = null; }, 300);
+            tappedBefore = tappedNow;
+          }
+          nodes.addClass('eater');
+
+          for(;;){
+            var connectedEdges = nodes.connectedEdges(function(el){
+              return !el.target().anySame( nodes );
+            });
+
+            var connectedNodes = connectedEdges.targets();
+
+            Array.prototype.push.apply( food, connectedNodes );
+
+            nodes = connectedNodes;
+
+            if( nodes.empty() ){ break; }
+          }
+
+          var delay = 0;
+          var duration = 500;
+        }); // on tap
+
+      </script>
+      <div class="container-fluid py-4">
+        {% for user in accs %}
+          <div class="row mt-4">
+            <div class="col-lg-5 mb-lg-0 mb-4">
+              <div class="card z-index-2">
+                <div class="card-body p-3">
+                  <div class="bg-gradient-dark border-radius-lg py-3 pe-1 mb-3">
+                    <div class="chart">
+                      <canvas id="chart-bars_{{ user.id }}" class="chart-canvas" height="170"></canvas>
+                    </div>
+                  </div>
+                  <h6 class="ms-2 mt-4 mb-0"> {{ user.name }} </h6>
+                  <div class="container border-radius-lg">
+                    <div class="row">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-7">
+              <div class="card z-index-2">
+                <div class="card-header pb-0">
+                  <h6>{{ user.name }}</h6>
+                </div>
+                <div class="card-body p-3">
+                  <div class="chart">
+                    <canvas id="chart-line_{{ user.id }}" class="chart-canvas" height="300"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        {% endfor %}
+
+        <div class="row my-4" style="width: 100%;">
+          <div class="col-lg-8 col-md-6 mb-md-0 mb-4">
+            <div class="card">
+              <div class="card-header pb-0">
+                <div class="row">
+                  <div class="col-lg-6 col-7">
+                    <h6>Users</h6>
+                    <p class="text-sm mb-0">
+                      <i class="fa fa-check text-info" aria-hidden="true"></i>
+                    </p>
+                  </div>
+                  <div class="col-lg-6 col-5 my-auto text-end">
+                  </div>
+                </div>
+              </div>
+              <div class="card-body px-0 pb-2">
+                <div class="table-responsive">
+                  <table class="table align-items-center mb-0">
+                    <thead>
+                      <tr>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Name</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Profile</th>
+                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Similarity</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for user in accs %}
+                        <tr>
+                          <td>
+                            <div class="d-flex px-2 py-1">
+                              <div>
+                              </div>
+                              <div class="d-flex flex-column justify-content-center">
+                                <h6 class="mb-0 text-sm">{{ user.name }}</h6>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <div class="avatar-group mt-2">
+                              <a href="https://twitter.com/{{ user.acc1_profile }}" class="avatar avatar-xs rounded-circle" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ acc1_profile }}">
+                                <img src="https://twitter.com/{{ user.acc1_profile }}/profile_image?size=mini" alt="{{ acc1_profile }}">
+                              </a>
+                              <a href="https://twitter.com/{{ user.acc2_profile }}" class="avatar avatar-xs rounded-circle" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ acc2_profile }}">
+                                <img src="https://twitter.com/{{ user.acc2_profile }}/profile_image?size=mini" alt="{{ acc2_profile }}">
+                              </a>
+                              {{ user.gender }}
+                              {{ user.age }}
+                            </div>
+                          </td>
+                          <td class="align-middle">
+                            <div class="progress-wrapper w-75 mx-auto">
+                              <div class="progress-info">
+                                <div class="progress-percentage">
+                                  <span class="text-xs font-weight-bold">{{ user.similarity_percentage }}%</span>
+                                </div>
+                              </div>
+                              <div class="progress">
+                                <div class="progress-bar bg-gradient-info w-{{ user.similarity_percentage_round }}" role="progressbar" aria-valuenow="{{ user.similarity_percentage_round }}" aria-valuemin="0" aria-valuemax="{{ user.similarity_percentage_round }}"></div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% include "includes/footer.html" %}
+
+      </div>
+
+{% endblock content %}
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}
+
+  <script>
+    {% for user in accs %}
+      var ctx = document.getElementById("chart-bars_{{ user.id }}").getContext("2d");
+
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["", "Text Similarity", "Media", "Hours"],
+          datasets: [{
+            label: "Similarity",
+            tension: 0.4,
+            borderWidth: 0,
+            borderRadius: 4,
+            scaleOverride: true,
+            scaleSteps: 10,
+            scaleStepWidth: 10,
+            borderSkipped: false,
+            backgroundColor: "#fff",
+            data: [100, {{ user.tfidf }}, {{ user.media }}, {{ user.hours_sim }}],
+            maxBarThickness: 6
+          }, ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false,
+            }
+          },
+          interaction: {
+            intersect: false,
+            mode: 'index',
+          },
+          scales: {
+            y: {
+              grid: {
+                drawBorder: false,
+                display: false,
+                drawOnChartArea: false,
+                drawTicks: false,
+              },
+              ticks: {
+                suggestedMin: 0,
+                suggestedMax: 100,
+                beginAtZero: true,
+                padding: 15,
+                font: {
+                  size: 14,
+                  family: "Open Sans",
+                  style: 'normal',
+                  lineHeight: 2
+                },
+                color: "#fff"
+              },
+            },
+            x: {
+              grid: {
+                drawBorder: false,
+                display: false,
+                drawOnChartArea: false,
+                drawTicks: false
+              },
+              ticks: {
+                display: false
+              },
+            },
+          },
+        },
+      });
+
+      var ctx2 = document.getElementById("chart-line_{{ user.id }}").getContext("2d");
+
+      var gradientStroke1 = ctx2.createLinearGradient(0, 230, 0, 50);
+
+      gradientStroke1.addColorStop(1, 'rgba(203,12,159,0.2)');
+      gradientStroke1.addColorStop(0.2, 'rgba(72,72,176,0.0)');
+      gradientStroke1.addColorStop(0, 'rgba(203,12,159,0)'); //purple colors
+
+      var gradientStroke2 = ctx2.createLinearGradient(0, 230, 0, 50);
+
+      gradientStroke2.addColorStop(1, 'rgba(20,23,39,0.2)');
+      gradientStroke2.addColorStop(0.2, 'rgba(72,72,176,0.0)');
+      gradientStroke2.addColorStop(0, 'rgba(20,23,39,0)'); //purple colors
+
+      new Chart(ctx2, {
+        type: "line",
+        data: {
+          labels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+          datasets: [{
+              label: "{{ user.id }}",
+              tension: 0.4,
+              borderWidth: 0,
+              pointRadius: 0,
+              borderColor: "#cb0c9f",
+              borderWidth: 3,
+              backgroundColor: gradientStroke1,
+              fill: true,
+              data: {{ user.hours1 }},
+              maxBarThickness: 6
+
+            },
+            {
+              label: "{{ user.id }}",
+              tension: 0.4,
+              borderWidth: 0,
+              pointRadius: 0,
+              borderColor: "#3A416F",
+              borderWidth: 3,
+              backgroundColor: gradientStroke2,
+              fill: true,
+              data: {{ user.hours2 }},
+              maxBarThickness: 6
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false,
+            }
+          },
+          interaction: {
+            intersect: false,
+            mode: 'index',
+          },
+          scales: {
+            y: {
+              grid: {
+                drawBorder: false,
+                display: true,
+                drawOnChartArea: true,
+                drawTicks: false,
+                borderDash: [5, 5]
+              },
+              ticks: {
+                display: true,
+                padding: 10,
+                color: '#b2b9bf',
+                font: {
+                  size: 11,
+                  family: "Open Sans",
+                  style: 'normal',
+                  lineHeight: 2
+                },
+              }
+            },
+            x: {
+              grid: {
+                drawBorder: false,
+                display: false,
+                drawOnChartArea: false,
+                drawTicks: false,
+                borderDash: [5, 5]
+              },
+              ticks: {
+                display: true,
+                color: '#b2b9bf',
+                padding: 20,
+                font: {
+                  size: 11,
+                  family: "Open Sans",
+                  style: 'normal',
+                  lineHeight: 2
+                },
+              }
+            },
+          },
+        },
+      });
+    {% endfor %}
+  </script>
+
+{% endblock javascripts %}
