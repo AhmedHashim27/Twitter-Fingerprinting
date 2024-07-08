@@ -52,11 +52,7 @@ Set up your environment variables by creating a `.env` file in the project root 
 ### 5. Run the Application
 Start the application using `gunicorn`:
 
-```bash
-gunicorn --bind 0.0.0.0:8000 your_project_name.wsgi
-```
 
-Replace `your_project_name` with the actual name of your Django project.
 
 ## 🧠 Algorithms and Techniques
 
@@ -66,11 +62,7 @@ This project leverages several advanced algorithms and techniques, including:
 - **Machine Learning Algorithms**: Various algorithms are used for classification and clustering of Twitter data.
 - **Data Preprocessing**: Techniques such as tokenization, stopword removal, and TF-IDF vectorization are used to prepare the data for analysis.
 
-## 📊 Extracted Graphs/Images
 
-Below are some key graphs and images from the project:
-
-![Extracted Graphs](./path_to_your_image/extracted_graphs.png)
 
 ## 📝 Additional Resources
 
@@ -83,23 +75,3 @@ Feel free to contribute to this project by submitting issues or pull requests. W
 
 Enjoy working on the Twitter Fingerprinting Project! If you have any questions, feel free to reach out. Happy coding! 🎉
 
-## 📜 Requirements
-
-```text
-asgiref==3.4.1
-autopep8==1.6.0
-dj-database-url==0.5.0
-Django==3.2.11
-gunicorn==20.1.0
-pycodestyle==2.8.0
-python-decouple==3.5
-pytz==2021.3
-sqlparse==0.4.2
-toml==0.10.2
-Unipath==1.1
-whitenoise==5.3.0
-```
-
-## 📸 Poster Image
-
-![Poster Image](./path_to_your_image/poster_image.png)
