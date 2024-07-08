@@ -53,10 +53,10 @@ Set up your environment variables by creating a `.env` file in the project root 
 Start the application using `gunicorn`:
 
 ```bash
-gunicorn --bind 0.0.0.0:8000 Twitter-Fingerprinting.wsgi
+gunicorn --bind 0.0.0.0:8000 your_project_name.wsgi
 ```
 
-Replace `Twitter-Fingerprinting` with the actual name of your Django project.
+Replace `your_project_name` with the actual name of your Django project.
 
 ## 🧠 Algorithms and Techniques
 
@@ -65,6 +65,10 @@ This project leverages several advanced algorithms and techniques, including:
 - **Natural Language Processing (NLP)**: Used for text analysis, sentiment analysis, and language modeling. The `tf` function calculates term frequency-inverse document frequency (TF-IDF) for tweet content to measure the importance of words in tweets.
 - **Machine Learning Algorithms**: Various algorithms are used for classification and clustering of Twitter data. The project uses similarity measures to compare tweet content, posting times, and media to identify similar accounts.
 - **Data Preprocessing**: Techniques such as tokenization, stopword removal, and TF-IDF vectorization are used to prepare the data for analysis.
+- **Time Similarity Calculation**: The `get_daily_time` function calculates the similarity in posting times between two accounts by comparing their activity patterns over a 24-hour period.
+- **Media Similarity Calculation**: The `compare_media` function uses an external API to compare images posted by different accounts, measuring the similarity in the media content they share.
+- **Gender and Age Inference**: The `get_user_tweets` function uses the M3Twitter library to infer the gender and age of a Twitter user based on their profile and activity.
+- **Account Search and Analysis**: The `search_for_accounts` function searches for related accounts based on user names and tweet content, while the `big_analysis` function performs a comprehensive analysis of the target account and its related accounts, including tweet content, posting times, and media.
 
 ## 📊 Extracted Graphs/Images
 
