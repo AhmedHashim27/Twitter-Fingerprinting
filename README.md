@@ -69,11 +69,6 @@ This project leverages several advanced algorithms and techniques, including:
 - **Gender and Age Inference**: The `get_user_tweets` function uses the M3Twitter library to infer the gender and age of a Twitter user based on their profile and activity.
 - **Account Search and Analysis**: The `search_for_accounts` function searches for related accounts based on user names and tweet content, while the `big_analysis` function performs a comprehensive analysis of the target account and its related accounts, including tweet content, posting times, and media.
 
-## 📊 Extracted Graphs/Images
-
-Below are some key graphs and images from the project:
-
-![Extracted Graphs](./path_to_your_image/extracted_graphs.png)
 
 ## 📝 Additional Resources
 
