@@ -53,10 +53,10 @@ Set up your environment variables by creating a `.env` file in the project root 
 Start the application using `gunicorn`:
 
 ```bash
-gunicorn --bind 0.0.0.0:8000 your_project_name.wsgi
+gunicorn --bind 0.0.0.0:8000 Twitter-Fingerprinting.wsgi
 ```
 
-Replace `your_project_name` with the actual name of your Django project.
+Replace `Twitter-Fingerprinting` with the actual name of your Django project.
 
 ## 🧠 Algorithms and Techniques
 
